@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
+using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 
 namespace CSharp.Editor.Utils
@@ -10,18 +12,25 @@ namespace CSharp.Editor.Utils
         [MenuItem(UtilsPrefix + "/ClearMissingScript")]
         public static void ClearMissingMonoBehaviours()
         {
-            var guids = AssetDatabase.FindAssets("t:prefab");
-            foreach (var guid in guids)
+            try
             {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (go)
+                AssetDatabase.StartAssetEditing();
+                var guids = AssetDatabase.FindAssets("t:prefab");
+                foreach (var guid in guids)
                 {
-                    if (GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(go) > 0)
-                        GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+                    var path = AssetDatabase.GUIDToAssetPath(guid);
+                    var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    if (go)
+                    {
+                        if (GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(go) > 0)
+                            GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+                    }
                 }
             }
-            AssetDatabase.Refresh();
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
         }
     }
 }
